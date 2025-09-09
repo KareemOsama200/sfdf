@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}سلة الكتب{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-shopping-cart me-2"></i>
+                سلة الكتب
+            </h2>
+            <a href="{{ url_for('user_select_books') }}" class="btn btn-outline-primary">
+                <i class="fas fa-plus me-2"></i>
+                إضافة كتب أخرى
+            </a>
+        </div>
+
+        <!-- Cart Items -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">الكتب المختارة ({{ cart|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% for book in cart %}
+                <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                    <div>
+                        <h6 class="mb-1">{{ book.name }} 
+                            <span class="badge bg-primary">الكمية: {{ book.quantity or 1 }}</span>
+                        </h6>
+                        <small class="text-muted">
+                            <i class="fas fa-graduation-cap me-1"></i>
+                            {{ book.year_name }} - {{ book.subject_name }}
+                        </small><br>
+                        <small class="text-muted">
+                            <i class="fas fa-file-alt me-1"></i>
+                            عدد الصفحات: {{ book.pages }}
+                        </small>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('remove_from_cart', book_id=book.id) }}" 
+                           class="btn btn-outline-danger btn-sm"
+                           onclick="return confirm('هل تريد حذف هذا الكتاب من السلة؟')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Cost Calculation Form -->
+        <form method="POST" action="{{ url_for('calculate_cart_cost') }}" id="costForm">
+            <div class="row">
+                <!-- Printing Options -->
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">نوع الطباعة</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for price in printing_prices %}
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="printing_price_id" 
+                                       id="price{{ price.id }}" value="{{ price.id }}" 
+                                       {% if loop.first %}checked{% endif %}>
+                                <label class="form-check-label" for="price{{ price.id }}">
+                                    <strong>{{ price.name }}</strong><br>
+                                    <small class="text-muted">
+                                        {{ price.pages_per_unit }} صفحة لكل وحدة - 
+                                        {{ "%.2f"|format(price.price_per_unit) }} ج.م للوحدة
+                                    </small>
+                                    {% if price.description %}
+                                    <br><small class="text-muted">{{ price.description }}</small>
+                                    {% endif %}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add-ons -->
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">إضافات اختيارية</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for addon in addons %}
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" name="addons" 
+                                       value="{{ addon.id }}" id="addon{{ addon.id }}">
+                                <label class="form-check-label" for="addon{{ addon.id }}">
+                                    <strong>{{ addon.name }}</strong>
+                                    <span class="badge bg-primary ms-2">{{ "%.2f"|format(addon.price) }} ج.م</span>
+                                    {% if addon.description %}
+                                    <br><small class="text-muted">{{ addon.description }}</small>
+                                    {% endif %}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calculate Button -->
+            <div class="text-center mb-4">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-calculator me-2"></i>
+                    حساب التكلفة الإجمالية
+                </button>
+            </div>
+        </form>
+
+        <!-- Cost Results (will be shown after calculation) -->
+        {% if calculation %}
+        <div class="card mt-4 border-success">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-receipt me-2"></i>
+                    تفاصيل التكلفة
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- Books Details -->
+                <div class="table-responsive mb-4">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>اسم الكتاب</th>
+                                <th>الكمية</th>
+                                <th>عدد الصفحات</th>
+                                <th>الوحدات للنسخة</th>
+                                <th>تكلفة النسخة</th>
+                                <th>إجمالي التكلفة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for book_calc in calculation.books_details %}
+                            <tr>
+                                <td>{{ book_calc.name }}</td>
+                                <td>{{ book_calc.quantity }}</td>
+                                <td>{{ book_calc.pages }}</td>
+                                <td>{{ book_calc.units_needed }}</td>
+                                <td>{{ "%.2f"|format(book_calc.printing_cost_per_copy) }} ج.م</td>
+                                <td>{{ "%.2f"|format(book_calc.total_printing_cost) }} ج.م</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Cost Summary -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="list-group">
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>نوع الطباعة:</span>
+                                <strong>{{ calculation.printing_price.name }}</strong>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>إجمالي تكلفة الطباعة:</span>
+                                <strong>{{ "%.2f"|format(calculation.total_printing_cost) }} ج.م</strong>
+                            </div>
+                            {% if calculation.selected_addons %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>الإضافات:</span>
+                                <strong>{{ "%.2f"|format(calculation.addons_cost) }} ج.م</strong>
+                            </div>
+                            {% endif %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center bg-success text-white">
+                                <span><strong>إجمالي التكلفة:</strong></span>
+                                <strong>{{ "%.2f"|format(calculation.total_cost) }} ج.م</strong>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <!-- Invoice Form -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">طباعة الفاتورة</h6>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" action="{{ url_for('print_invoice') }}" target="_blank">
+                                    
+                                    <div class="mb-3">
+                                        <label for="customer_name" class="form-label">اسم العميل</label>
+                                        <input type="text" class="form-control" id="customer_name" name="customer_name" required>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="customer_phone" class="form-label">رقم الهاتف</label>
+                                        <input type="tel" class="form-control" id="customer_phone" name="customer_phone" 
+                                               placeholder="01xxxxxxxxx" required>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="amount_paid" class="form-label">المبلغ المدفوع (ج.م)</label>
+                                        <input type="number" step="0.01" class="form-control" id="amount_paid" 
+                                               name="amount_paid" value="{{ "%.2f"|format(calculation.total_cost) }}" required>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="notes" class="form-label">ملاحظات (اختياري)</label>
+                                        <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="fas fa-print me-2"></i>
+                                        طباعة الفاتورة
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Navigation -->
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <a href="{{ url_for('user_select_books') }}" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-arrow-right me-2"></i>
+                    العودة لاختيار الكتب
+                </a>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-home me-2"></i>
+                    الصفحة الرئيسية
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.border-bottom:last-child {
+    border-bottom: none !important;
+}
+
+.list-group-item {
+    border-left: none;
+    border-right: none;
+}
+
+.list-group-item:first-child {
+    border-top: none;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}اختيار الكتب{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="fas fa-books me-2"></i>
+                اختيار الكتب
+            </h2>
+            <div>
+                <a href="{{ url_for('view_cart') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-shopping-cart me-2"></i>
+                    السلة ({{ session.cart|length if session.cart else 0 }})
+                </a>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            اختر الكتب التي تريد طباعتها. يمكنك اختيار كتب من سنوات دراسية مختلفة.
+        </div>
+
+        <!-- Books by Academic Year -->
+        {% for year_data in years_with_books %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-graduation-cap me-2"></i>
+                    {{ year_data.year.name }}
+                </h5>
+                {% if year_data.year.description %}
+                <small class="text-muted">{{ year_data.year.description }}</small>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for book in year_data.books %}
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-light">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ book.name }}</h6>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-book me-1"></i>
+                                        المادة: {{ book.subject_name }}
+                                    </small><br>
+                                    <small class="text-muted">
+                                        <i class="fas fa-file-alt me-1"></i>
+                                        عدد الصفحات: {{ book.page_count }}
+                                    </small>
+                                </p>
+                                
+                                <!-- Check if book is already in cart -->
+                                {% set in_cart = false %}
+                                {% if session.cart %}
+                                    {% for item in session.cart %}
+                                        {% if item.id == book.id %}
+                                            {% set in_cart = true %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                                
+                                {% if in_cart %}
+                                <button class="btn btn-success btn-sm" disabled>
+                                    <i class="fas fa-check me-1"></i>
+                                    في السلة
+                                </button>
+                                {% else %}
+                                <a href="{{ url_for('add_to_cart', book_id=book.id) }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus me-1"></i>
+                                    أضف للسلة
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-book fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">لا توجد كتب متاحة</h4>
+            <p class="text-muted">يرجى إضافة سنوات دراسية ومواد وكتب من لوحة الإدارة</p>
+            {% if session.admin_logged_in %}
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary">
+                <i class="fas fa-cog me-2"></i>
+                إدارة البيانات
+            </a>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- Navigation -->
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-home me-2"></i>
+                    الصفحة الرئيسية
+                </a>
+                {% if session.cart and session.cart|length > 0 %}
+                <a href="{{ url_for('view_cart') }}" class="btn btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    متابعة للسلة
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.btn-sm {
+    font-size: 0.85rem;
+}
+</style>
+{% endblock %}

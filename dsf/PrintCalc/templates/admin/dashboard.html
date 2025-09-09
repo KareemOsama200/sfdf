@@ -1,0 +1,369 @@
+{% extends "base.html" %}
+
+{% block title %}لوحة الإدارة - حاسبة تكلفة الطباعة{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-tachometer-alt me-2"></i>
+            لوحة الإدارة
+        </h2>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ years_count }}</h4>
+                        <p class="mb-0">السنوات الدراسية</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-graduation-cap fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ subjects_count }}</h4>
+                        <p class="mb-0">المواد الدراسية</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-book fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ books_count }}</h4>
+                        <p class="mb-0">الكتب</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-books fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ total_orders or 0 }}</h4>
+                        <p class="mb-0">إجمالي الطلبات</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-shopping-cart fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Employee Statistics -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card bg-secondary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ total_employees or 0 }}</h4>
+                        <p class="mb-0">إجمالي الموظفين</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ active_employees or 0 }}</h4>
+                        <p class="mb-0">الموظفين النشطين</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-user-check fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ recent_employees|length or 0 }}</h4>
+                        <p class="mb-0">سجلوا دخول مؤخراً</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-sign-in-alt fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Statistics -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ new_orders or 0 }}</h4>
+                        <p class="mb-0">طلبات جديدة</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-plus-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ in_progress_orders or 0 }}</h4>
+                        <p class="mb-0">قيد التنفيذ</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-cogs fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ completed_orders or 0 }}</h4>
+                        <p class="mb-0">مكتملة</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Management Cards -->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-graduation-cap me-2"></i>
+                    إدارة السنوات الدراسية
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">إضافة وتعديل وحذف السنوات الدراسية</p>
+                <a href="{{ url_for('admin_years') }}" class="btn btn-primary">
+                    <i class="fas fa-edit me-2"></i>
+                    إدارة السنوات
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-book me-2"></i>
+                    إدارة المواد الدراسية
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">إضافة وتعديل وحذف المواد لكل سنة دراسية</p>
+                <a href="{{ url_for('admin_subjects') }}" class="btn btn-success">
+                    <i class="fas fa-edit me-2"></i>
+                    إدارة المواد
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-books me-2"></i>
+                    إدارة الكتب
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">إضافة وتعديل وحذف الكتب لكل مادة دراسية</p>
+                <a href="{{ url_for('admin_books') }}" class="btn btn-info">
+                    <i class="fas fa-edit me-2"></i>
+                    إدارة الكتب
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-shopping-cart me-2"></i>
+                    إدارة الطلبات
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">متابعة وإدارة طلبات العملاء وتحديث حالة الطلبات</p>
+                <a href="{{ url_for('admin_orders') }}" class="btn btn-primary me-2">
+                    <i class="fas fa-list me-2"></i>
+                    جميع الطلبات
+                </a>
+                <a href="{{ url_for('admin_orders', status='new') }}" class="btn btn-info">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    الطلبات الجديدة
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-users me-2"></i>
+                    إدارة الموظفين
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">إضافة وتعديل وإدارة حسابات الموظفين ومتابعة نشاطهم</p>
+                <a href="{{ url_for('admin_employees') }}" class="btn btn-secondary">
+                    <i class="fas fa-user-cog me-2"></i>
+                    إدارة الموظفين
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-sliders-h me-2"></i>
+                    إعدادات الأسعار
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">تحديد أسعار الطباعة والإضافات الثابتة</p>
+                <a href="{{ url_for('admin_settings') }}" class="btn btn-warning">
+                    <i class="fas fa-cog me-2"></i>
+                    إدارة الإعدادات
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Employee Activity -->
+{% if recent_employees %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>
+                    آخر نشاط للموظفين
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>الموظف</th>
+                                <th>آخر تسجيل دخول</th>
+                                <th>عدد مرات الدخول</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for employee in recent_employees %}
+                            <tr>
+                                <td>
+                                    <strong>{{ employee.full_name }}</strong>
+                                    {% if employee.username == 'admin' %}
+                                    <span class="badge bg-danger ms-1">مدير</span>
+                                    {% endif %}
+                                    <br>
+                                    <small class="text-muted">{{ employee.username }}</small>
+                                </td>
+                                <td>
+                                    {% if employee.last_login %}
+                                    <span class="text-success">
+                                        <i class="fas fa-clock"></i>
+                                        {{ employee.last_login.strftime('%Y-%m-%d') }}<br>
+                                        <small>{{ employee.last_login.strftime('%H:%M') }}</small>
+                                    </span>
+                                    {% else %}
+                                    <span class="text-muted">لم يسجل دخول بعد</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ employee.login_count or 0 }}</span>
+                                </td>
+                                <td>
+                                    {% if employee.is_active %}
+                                    <span class="badge bg-success">نشط</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">معطل</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('admin_employees') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-users me-2"></i>
+                        إدارة جميع الموظفين
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

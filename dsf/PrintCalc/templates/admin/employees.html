@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3">
+            {% include 'admin/sidebar.html' %}
+        </div>
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-users"></i> إدارة الموظفين</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+                    <i class="fas fa-plus"></i> إضافة موظف جديد
+                </button>
+            </div>
+
+            <!-- Employee Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">{{ employees|length }}</h4>
+                                    <p class="card-text">إجمالي الموظفين</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-users fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">{{ employees|selectattr('is_active')|list|length }}</h4>
+                                    <p class="card-text">الموظفين النشطين</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-user-check fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">{{ employees|rejectattr('is_active')|list|length }}</h4>
+                                    <p class="card-text">الموظفين المعطلين</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-user-times fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title">{{ employees|selectattr('last_login')|list|length }}</h4>
+                                    <p class="card-text">سجلوا دخول مسبقاً</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-sign-in-alt fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employees Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">قائمة الموظفين</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>الاسم الكامل</th>
+                                    <th>اسم المستخدم</th>
+                                    <th>الهاتف</th>
+                                    <th>تاريخ الإنشاء</th>
+                                    <th>آخر تسجيل دخول</th>
+                                    <th>عدد مرات الدخول</th>
+                                    <th>الحالة</th>
+                                    <th>العمليات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for employee in employees %}
+                                <tr class="{% if not employee.is_active %}table-secondary{% endif %}">
+                                    <td>
+                                        <strong>{{ employee.full_name }}</strong>
+                                        {% if employee.username == 'admin' %}
+                                        <span class="badge bg-danger ms-2">مدير</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><code>{{ employee.username }}</code></td>
+                                    <td>
+                                        {% if employee.phone %}
+                                        <a href="tel:{{ employee.phone }}" class="text-decoration-none">
+                                            <i class="fas fa-phone"></i> {{ employee.phone }}
+                                        </a>
+                                        {% else %}
+                                        <span class="text-muted">غير محدد</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small>{{ employee.created_at.strftime('%Y-%m-%d %H:%M') if employee.created_at else 'غير محدد' }}</small>
+                                    </td>
+                                    <td>
+                                        {% if employee.last_login %}
+                                        <span class="text-success">
+                                            <i class="fas fa-clock"></i> 
+                                            {{ employee.last_login.strftime('%Y-%m-%d %H:%M') }}
+                                        </span>
+                                        {% else %}
+                                        <span class="text-muted">لم يسجل دخول بعد</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ employee.login_count or 0 }}</span>
+                                    </td>
+                                    <td>
+                                        {% if employee.is_active %}
+                                        <span class="badge bg-success">نشط</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">معطل</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary me-1" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#editEmployeeModal{{ employee.id }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        {% if employee.username != 'admin' %}
+                                        <button class="btn btn-sm btn-outline-danger" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#deleteEmployeeModal{{ employee.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Employee Modal -->
+<div class="modal fade" id="addEmployeeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة موظف جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('add_employee') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="full_name" class="form-label">الاسم الكامل *</label>
+                        <input type="text" class="form-control" id="full_name" name="full_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">اسم المستخدم *</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                        <div class="form-text">سيتم استخدامه لتسجيل الدخول</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">رقم الهاتف</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="01xxxxxxxxx">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">كلمة المرور *</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <div class="form-text">يجب أن تكون قوية وآمنة</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">إضافة الموظف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Employee Modals -->
+{% for employee in employees %}
+<div class="modal fade" id="editEmployeeModal{{ employee.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تعديل بيانات {{ employee.full_name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('edit_employee', employee_id=employee.id) }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="full_name{{ employee.id }}" class="form-label">الاسم الكامل</label>
+                        <input type="text" class="form-control" id="full_name{{ employee.id }}" 
+                               name="full_name" value="{{ employee.full_name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone{{ employee.id }}" class="form-label">رقم الهاتف</label>
+                        <input type="tel" class="form-control" id="phone{{ employee.id }}" 
+                               name="phone" value="{{ employee.phone or '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password{{ employee.id }}" class="form-label">كلمة المرور الجديدة</label>
+                        <input type="password" class="form-control" id="password{{ employee.id }}" name="password">
+                        <div class="form-text">اتركها فارغة إذا كنت لا تريد تغييرها</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="is_active{{ employee.id }}" 
+                                   name="is_active" {% if employee.is_active %}checked{% endif %}>
+                            <label class="form-check-label" for="is_active{{ employee.id }}">
+                                حساب نشط
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Delete Employee Modals -->
+{% for employee in employees %}
+{% if employee.username != 'admin' %}
+<div class="modal fade" id="deleteEmployeeModal{{ employee.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تأكيد حذف الموظف</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>هل أنت متأكد من رغبتك في حذف الموظف <strong>{{ employee.full_name }}</strong>؟</p>
+                <p class="text-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    هذا الإجراء لا يمكن التراجع عنه!
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <form method="POST" action="{{ url_for('delete_employee', employee_id=employee.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">حذف الموظف</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+{% endblock %}
