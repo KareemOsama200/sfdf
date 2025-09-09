@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}لوحة الموظف - {{ employee_name }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-user me-2"></i>
+            مرحباً {{ employee_name }}
+        </h2>
+        <p class="text-muted">يمكنك الوصول لحساب تكلفة الطباعة ومتابعة الطلبات</p>
+    </div>
+</div>
+
+<!-- Order Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ total_orders or 0 }}</h4>
+                        <p class="mb-0">إجمالي الطلبات</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-shopping-cart fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ new_orders or 0 }}</h4>
+                        <p class="mb-0">طلبات جديدة</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-plus-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ in_progress_orders or 0 }}</h4>
+                        <p class="mb-0">قيد التنفيذ</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-cogs fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4>{{ completed_orders or 0 }}</h4>
+                        <p class="mb-0">مكتملة</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Employee Functions -->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-calculator me-2"></i>
+                    حساب تكلفة الطباعة
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">احسب تكلفة طباعة الكتب للعملاء وأنشئ فواتير</p>
+                <a href="{{ url_for('user_select_books') }}" class="btn btn-primary">
+                    <i class="fas fa-book me-2"></i>
+                    اختر الكتب لحساب التكلفة
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    متابعة الطلبات
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">راجع طلبات العملاء وتابع حالة الطلبات</p>
+                <a href="{{ url_for('admin_orders') }}" class="btn btn-info me-2">
+                    <i class="fas fa-list me-2"></i>
+                    جميع الطلبات
+                </a>
+                <a href="{{ url_for('admin_orders', status='new') }}" class="btn btn-warning">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    الطلبات الجديدة
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Instructions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <h6 class="alert-heading">
+                <i class="fas fa-info-circle me-2"></i>
+                تعليمات سريعة
+            </h6>
+            <p class="mb-2"><strong>وظائفك كموظف:</strong></p>
+            <ul class="mb-0">
+                <li>حساب تكلفة طباعة الكتب للعملاء</li>
+                <li>إنشاء فواتير للعملاء</li>
+                <li>متابعة الطلبات وحالتها</li>
+                <li>مساعدة العملاء في استعلامات الطلبات</li>
+            </ul>
+            <hr>
+            <p class="mb-0">
+                <strong>للمساعدة أو طلب صلاحيات إضافية:</strong> تواصل مع المدير
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity (if any orders exist) -->
+{% if total_orders > 0 %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>
+                    الطلبات الأخيرة
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    <i class="fas fa-chart-line me-2"></i>
+                    إجمالي {{ total_orders }} طلب في النظام
+                </p>
+                <a href="{{ url_for('admin_orders') }}" class="btn btn-outline-primary btn-sm">
+                    عرض جميع الطلبات
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

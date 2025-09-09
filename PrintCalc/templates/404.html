@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}الصفحة غير موجودة - حاسبة تكلفة الطباعة{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <div class="mb-5">
+        <i class="fas fa-exclamation-triangle fa-5x text-warning mb-4"></i>
+        <h1 class="display-1 fw-bold">404</h1>
+        <h2 class="mb-4">الصفحة غير موجودة</h2>
+        <p class="fs-5 text-muted mb-4">عذراً، الصفحة التي تبحث عنها غير موجودة أو تم نقلها.</p>
+        
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-home me-2"></i>
+                العودة للصفحة الرئيسية
+            </a>
+            <a href="{{ url_for('user_select_year') }}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-calculator me-2"></i>
+                حساب التكلفة
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

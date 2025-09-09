@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}تفاصيل الطلب {{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>
+                    <i class="fas fa-file-invoice me-2"></i>
+                    تفاصيل الطلب: {{ order.order_number[:8] }}...
+                </h2>
+                <div>
+                    <span class="text-muted">{{ employee_name }}</span>
+                    <a href="{{ url_for('admin_orders') }}" class="btn btn-outline-secondary btn-sm ms-2">
+                        <i class="fas fa-arrow-right"></i> العودة للطلبات
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Order Information -->
+                <div class="col-lg-8">
+                    <!-- Status Management -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">إدارة حالة الطلب</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST" action="{{ url_for('update_order_status', order_number=order.order_number) }}">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <label for="status" class="form-label">الحالة الحالية:</label>
+                                        <select name="status" id="status" class="form-select">
+                                            <option value="new" {% if order.status == 'new' %}selected{% endif %}>جديد</option>
+                                            <option value="in_progress" {% if order.status == 'in_progress' %}selected{% endif %}>قيد التنفيذ</option>
+                                            <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>مكتمل</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-save me-2"></i>
+                                            حفظ التغييرات
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Order Items -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">تفاصيل الكتب</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>اسم الكتاب</th>
+                                            <th>الكمية</th>
+                                            <th>عدد الصفحات</th>
+                                            <th>تكلفة النسخة</th>
+                                            <th>إجمالي التكلفة</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in order.order_items %}
+                                        <tr>
+                                            <td>{{ loop.index }}</td>
+                                            <td>{{ item.book.name }}</td>
+                                            <td>{{ item.quantity }}</td>
+                                            <td>{{ item.book.page_count }}</td>
+                                            <td>{{ "%.2f"|format(item.unit_cost) }} ج.م</td>
+                                            <td>{{ "%.2f"|format(item.total_cost) }} ج.م</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="table-success">
+                                            <th colspan="5" class="text-end">إجمالي الطلب:</th>
+                                            <th>{{ "%.2f"|format(order.total_cost) }} ج.م</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">إجراءات سريعة</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="btn-group" role="group">
+                                {% if order.customer_phone %}
+                                <a href="https://wa.me/{{ order.customer_phone }}?text=مرحباً {{ order.customer_name }}، بخصوص طلبكم رقم {{ order.order_number }} من مكتبة سنتر أدم - 01225860004" 
+                                   class="btn btn-success" 
+                                   target="_blank">
+                                    <i class="fab fa-whatsapp me-2"></i>
+                                    إرسال واتساب
+                                </a>
+                                <a href="tel:{{ order.customer_phone }}" class="btn btn-primary">
+                                    <i class="fas fa-phone me-2"></i>
+                                    اتصال
+                                </a>
+                                {% endif %}
+                                <a href="{{ url_for('track_order', order_number=order.order_number) }}" 
+                                   class="btn btn-info" 
+                                   target="_blank">
+                                    <i class="fas fa-external-link-alt me-2"></i>
+                                    عرض صفحة التتبع
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="col-lg-4">
+                    <!-- Customer Info -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">معلومات العميل</h6>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>الاسم:</strong><br>{{ order.customer_name or 'غير محدد' }}</p>
+                            <p><strong>الهاتف:</strong><br>{{ order.customer_phone or 'غير محدد' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Order Timeline -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">تواريخ مهمة</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline">
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-info"></div>
+                                    <div class="timeline-content">
+                                        <h6 class="timeline-title">تم إنشاء الطلب</h6>
+                                        <p class="timeline-text">{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                                    </div>
+                                </div>
+                                {% if order.completed_at %}
+                                <div class="timeline-item">
+                                    <div class="timeline-marker bg-success"></div>
+                                    <div class="timeline-content">
+                                        <h6 class="timeline-title">تم إنجاز الطلب</h6>
+                                        <p class="timeline-text">{{ order.completed_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">ملخص الطلب</h6>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>نوع الطباعة:</strong><br>{{ order.printing_type.name if order.printing_type else 'غير محدد' }}</p>
+                            <p><strong>عدد الكتب:</strong><br>{{ order.order_items|length }}</p>
+                            <p><strong>إجمالي النسخ:</strong><br>{{ order.order_items|sum(attribute='quantity') }}</p>
+                            <p><strong>التكلفة الإجمالية:</strong><br>
+                                <span class="h5 text-success">{{ "%.2f"|format(order.total_cost) }} ج.م</span>
+                            </p>
+                            <p><strong>الحالة:</strong><br>
+                                {% if order.status == 'new' %}
+                                <span class="badge bg-info">جديد</span>
+                                {% elif order.status == 'in_progress' %}
+                                <span class="badge bg-warning">قيد التنفيذ</span>
+                                {% elif order.status == 'completed' %}
+                                <span class="badge bg-success">مكتمل</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -35px;
+    top: 0;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 0 0 2px #ddd;
+}
+
+.timeline-content {
+    padding-left: 10px;
+}
+
+.timeline-title {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.timeline-text {
+    font-size: 12px;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: -28px;
+    top: 7px;
+    bottom: -10px;
+    width: 2px;
+    background: #ddd;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}تتبع الطلب رقم {{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-search me-2"></i>
+                        تتبع الطلب رقم: {{ order.order_number }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Order Status -->
+                    <div class="mb-4">
+                        <h5 class="mb-3">حالة الطلب</h5>
+                        <div class="progress mb-3" style="height: 25px;">
+                            {% if order.status == 'new' %}
+                            <div class="progress-bar bg-info" role="progressbar" style="width: 33%;">
+                                <strong>جديد</strong>
+                            </div>
+                            {% elif order.status == 'in_progress' %}
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: 66%;">
+                                <strong>قيد التنفيذ</strong>
+                            </div>
+                            {% elif order.status == 'completed' %}
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 100%;">
+                                <strong>مكتمل</strong>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="{% if order.status in ['new', 'in_progress', 'completed'] %}text-primary{% else %}text-muted{% endif %}">
+                                    <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                                    <p class="small mb-0">تم استلام الطلب</p>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="{% if order.status in ['in_progress', 'completed'] %}text-warning{% else %}text-muted{% endif %}">
+                                    <i class="fas fa-cogs fa-2x mb-2"></i>
+                                    <p class="small mb-0">قيد التنفيذ</p>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="{% if order.status == 'completed' %}text-success{% else %}text-muted{% endif %}">
+                                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                    <p class="small mb-0">مكتمل</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">معلومات العميل</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>الاسم:</strong> {{ order.customer_name or 'غير محدد' }}</p>
+                                    <p><strong>الهاتف:</strong> {{ order.customer_phone or 'غير محدد' }}</p>
+                                    <p><strong>تاريخ الطلب:</strong> {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                                    {% if order.completed_at %}
+                                    <p><strong>تاريخ الإنتهاء:</strong> {{ order.completed_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">معلومات الطلب</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>إجمالي التكلفة:</strong> {{ "%.2f"|format(order.total_cost) }} ج.م</p>
+                                    <p><strong>نوع الطباعة:</strong> {{ order.printing_type.name if order.printing_type else 'غير محدد' }}</p>
+                                    <p><strong>عدد الكتب:</strong> {{ order.order_items|length }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Items -->
+                    <div class="mb-4">
+                        <h5 class="mb-3">تفاصيل الكتب</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>اسم الكتاب</th>
+                                        <th>الكمية</th>
+                                        <th>تكلفة النسخة</th>
+                                        <th>إجمالي التكلفة</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in order.order_items %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>{{ item.book.name }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>{{ "%.2f"|format(item.unit_cost) }} ج.م</td>
+                                        <td>{{ "%.2f"|format(item.total_cost) }} ج.م</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Contact Section -->
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h6 class="mb-3">تواصل معنا للاستفسار</h6>
+                            <a href="https://wa.me/01225860004?text=مرحباً، أريد الاستفسار عن طلب رقم {{ order.order_number }}" 
+                               class="btn btn-success btn-lg me-2" 
+                               target="_blank">
+                                <i class="fab fa-whatsapp"></i> واتساب
+                            </a>
+                            <a href="tel:01225860004" class="btn btn-primary btn-lg">
+                                <i class="fas fa-phone"></i> اتصال
+                            </a>
+                            <p class="mt-3 mb-0 text-muted">
+                                <strong>مكتبة سنتر أدم</strong><br>
+                                هاتف: 01225860004
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="text-center mt-4">
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-home me-2"></i>
+                    الصفحة الرئيسية
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+</style>
+{% endblock %}
